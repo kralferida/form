@@ -7,10 +7,10 @@ export default function SuccessPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Redirect to home after 10 seconds
+    // Redirect to home after 1 minute
     const timer = setTimeout(() => {
       router.push("/")
-    }, 10000)
+    }, 60000)
 
     return () => clearTimeout(timer)
   }, [router])
@@ -30,21 +30,16 @@ export default function SuccessPage() {
           </div>
 
           <div className="bg-secondary/50 rounded-lg p-6 mb-6">
-            <h2 className="font-semibold text-foreground mb-3">Sonraki Adımlar:</h2>
-            <ul className="text-left space-y-2 text-muted-foreground">
-              <li className="flex items-start">
-                <span className="text-primary mr-2">1.</span>
-                <span>Form bilgileriniz Telegram üzerinden size iletilecektir.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-primary mr-2">2.</span>
-                <span>Lütfen gelen bilgileri kontrol edin ve gerekli düzeltmeleri bildirin.</span>
-              </li>
-              <li className="flex items-start">
-                <span className="text-primary mr-2">3.</span>
-                <span>Vize randevunuz için gerekli belgeleri hazırlayın.</span>
-              </li>
-            </ul>
+            <h2 className="font-semibold text-foreground mb-3">Önemli:</h2>
+            <div className="text-left space-y-3 text-muted-foreground">
+              <p className="flex items-start">
+                <span className="text-primary mr-2">📸</span>
+                <span>Lütfen ABD konsolosluğu için 2 adet fotoğraf çektirin (5x5 cm, beyaz zemin)</span>
+              </p>
+              <p className="text-center text-primary font-semibold mt-4">
+                Size en kısa zamanda cevap verilecektir.
+              </p>
+            </div>
           </div>
 
           <button
@@ -55,7 +50,7 @@ export default function SuccessPage() {
           </button>
 
           <p className="text-sm text-muted-foreground mt-4">
-            10 saniye içinde otomatik olarak ana sayfaya yönlendirileceksiniz.
+            1 dakika içinde otomatik olarak ana sayfaya yönlendirileceksiniz.
           </p>
         </div>
       </div>
