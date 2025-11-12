@@ -66,6 +66,8 @@ ${formData.maritalStatus === 'Evli' ? `• Eş: ${formData.spouseName} - ${formD
 • Askerlik: ${formData.militaryService}
 • Ek Bilgiler: ${formData.additionalInfo || "Yok"}
 
+📸 *FOTOĞRAF:* ${formData.photo ? 'Eklendi ✅' : 'Yok ❌'}
+
 ⏰ *Gönderim Zamanı:* ${new Date().toLocaleString("tr-TR")}
     `.trim()
 
@@ -82,6 +84,26 @@ ${formData.maritalStatus === 'Evli' ? `• Eş: ${formData.spouseName} - ${formD
         parse_mode: "Markdown",
       }),
     })
+    
+    // Send photo if exists
+    if (formData.photo) {
+      try {
+        const photoUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`
+        await fetch(photoUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            chat_id: chatId,
+            photo: formData.photo,
+            caption: `📸 ${formData.fullName} - Pasaport Fotoğrafı`,
+          }),
+        })
+      } catch (photoError) {
+        console.error('Photo send error:', photoError)
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json()

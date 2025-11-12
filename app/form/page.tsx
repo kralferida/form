@@ -60,6 +60,7 @@ interface FormData {
   visitedCountries: string
   militaryService: string
   additionalInfo: string
+  photo: File | null
 }
 
 export default function VisaFormPage() {
@@ -106,6 +107,7 @@ export default function VisaFormPage() {
     visitedCountries: "",
     militaryService: "",
     additionalInfo: "",
+    photo: null,
   })
 
   useEffect(() => {
@@ -121,6 +123,24 @@ export default function VisaFormPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Lütfen geçerli bir resim dosyası seçin')
+        return
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Resim dosyası 5MB\'dan küçük olmalıdır')
+        return
+      }
+      setFormData((prev) => ({ ...prev, photo: file }))
+      setError('')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -128,6 +148,16 @@ export default function VisaFormPage() {
 
     try {
       const accessCode = sessionStorage.getItem("accessCode")
+      
+      // Convert photo to base64 if exists
+      let photoBase64 = null
+      if (formData.photo) {
+        const reader = new FileReader()
+        photoBase64 = await new Promise((resolve) => {
+          reader.onload = () => resolve(reader.result)
+          reader.readAsDataURL(formData.photo!)
+        })
+      }
 
       await fetch("/api/send-telegram", {
         method: "POST",
@@ -135,7 +165,7 @@ export default function VisaFormPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          formData,
+          formData: { ...formData, photo: photoBase64 },
           accessCode,
         }),
       })
@@ -782,6 +812,36 @@ export default function VisaFormPage() {
                   placeholder="Turizm amaçlı seyahat planlıyorum"
                   className="w-full px-4 py-2 border-2 border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
                 />
+              </div>
+            </div>
+
+            {/* Photo Upload */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold text-foreground border-b-2 border-border pb-2">📸 FOTOĞRAF</h2>
+              
+              <div>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Pasaport Fotoğrafı <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="w-full px-4 py-2 border-2 border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                  required
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  • 5x5 cm boyutunda, beyaz zeminüzerinde<br/>
+                  • Son 6 ay içinde çekilmiş olmalı<br/>
+                  • Maksimum dosya boyutu: 5MB
+                </p>
+                {formData.photo && (
+                  <div className="mt-3 p-3 bg-secondary/20 rounded-lg">
+                    <p className="text-sm text-foreground">
+                      ✅ Seçilen dosya: {formData.photo.name}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
