@@ -16,7 +16,7 @@ export async function POST(request) {
     if (text === '/pass') {
       const code = generateCode();
       
-      const botToken = process.env.TELEGRAM_BOT_TOKEN;
+      const botToken = process.env.PASSWORD_BOT_TOKEN;
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
       
       await fetch(telegramUrl, {

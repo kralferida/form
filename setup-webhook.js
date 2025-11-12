@@ -1,7 +1,7 @@
 // Run this once to set up Telegram webhook
 require('dotenv').config({ path: '.env.local' });
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const BOT_TOKEN = process.env.PASSWORD_BOT_TOKEN;
 const WEBHOOK_URL = 'https://yoursite.vercel.app/api/webhook'; // Deploy sonrası değiştir
 
 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`, {
