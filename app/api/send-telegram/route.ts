@@ -88,24 +88,38 @@ ${formData.maritalStatus === 'Evli' ? `• Eş: ${formData.spouseName} - ${formD
     // Send photo as separate message if exists
     if (formData.photo && formData.photo.startsWith('data:image/')) {
       try {
-        const photoUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`
+        // Convert base64 to buffer
+        const base64Data = formData.photo.split(',')[1]
+        const buffer = Buffer.from(base64Data, 'base64')
         
-        // Send photo using base64 data URL directly
+        const photoUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`
+        const photoFormData = new FormData()
+        
+        // Create blob from buffer for multipart upload
+        const blob = new Blob([buffer], { type: 'image/jpeg' })
+        
+        photoFormData.append('chat_id', chatId)
+        photoFormData.append('photo', blob, 'passport.jpg')
+        photoFormData.append('caption', `📸 ${formData.fullName}\n\nPasaport Fotoğrafı`)
+        
         const photoResponse = await fetch(photoUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            photo: formData.photo,
-            caption: `📸 *${formData.fullName}*\n\nPasaport Fotoğrafı`,
-            parse_mode: "Markdown"
-          }),
+          body: photoFormData,
         })
         
         if (!photoResponse.ok) {
-          console.error('Photo send failed:', await photoResponse.text())
+          const errorText = await photoResponse.text()
+          console.error('Photo send failed:', errorText)
+          
+          // Fallback: send error message
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: `⚠️ Fotoğraf gönderilemedi\n\n👤 ${formData.fullName}\n📸 Lütfen pasaport fotoğrafını manuel gönderin`,
+            }),
+          })
         }
       } catch (photoError) {
         console.error('Photo send error:', photoError)
