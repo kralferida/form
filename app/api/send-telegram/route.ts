@@ -85,23 +85,42 @@ ${formData.maritalStatus === 'Evli' ? `• Eş: ${formData.spouseName} - ${formD
       }),
     })
     
-    // Send photo if exists
-    if (formData.photo) {
+    // Send photo as separate message if exists
+    if (formData.photo && formData.photo.startsWith('data:image/')) {
       try {
+        // Convert base64 to buffer
+        const base64Data = formData.photo.split(',')[1]
+        const buffer = Buffer.from(base64Data, 'base64')
+        
         const photoUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`
+        const photoFormData = new FormData()
+        
+        // Create blob from buffer
+        const blob = new Blob([buffer], { type: 'image/jpeg' })
+        
+        photoFormData.append('chat_id', chatId)
+        photoFormData.append('photo', blob, 'photo.jpg')
+        photoFormData.append('caption', `📸 ${formData.fullName}\nPasaport Fotoğrafı`)
+        
         await fetch(photoUrl, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chat_id: chatId,
-            photo: formData.photo,
-            caption: `📸 ${formData.fullName} - Pasaport Fotoğrafı`,
-          }),
+          body: photoFormData,
         })
       } catch (photoError) {
         console.error('Photo send error:', photoError)
+        // Try alternative method with base64 URL
+        try {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: `📸 Fotoğraf yüklenemedi. Lütfen manuel olarak gönderin.\n\n${formData.fullName} - Pasaport Fotoğrafı`,
+            }),
+          })
+        } catch (fallbackError) {
+          console.error('Fallback message error:', fallbackError)
+        }
       }
     }
 

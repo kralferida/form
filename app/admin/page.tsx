@@ -18,7 +18,7 @@ export default function AdminPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     // Simple password check - in production, use proper authentication
-    if (adminPassword === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || adminPassword === "admin123") {
+    if (adminPassword === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || adminPassword === "9xK#mP7$vQ2@nL8&wR5*jF3!uE6%tY4^sA1+bN0-cZ9") {
       setIsAuthenticated(true)
       setError("")
 
@@ -98,9 +98,27 @@ export default function AdminPage() {
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-xl font-semibold text-foreground mb-4">Kod Oluşturma</h2>
-              <p className="text-muted-foreground mb-4">Yeni kod oluşturmak için Telegram'dan:</p>
-              <code className="bg-secondary px-4 py-2 rounded-lg text-primary font-mono text-lg">/pass</code>
-              <p className="text-sm text-muted-foreground mt-4">komutunu gönderin</p>
+              <p className="text-muted-foreground mb-4">Yeni kod oluşturmak için:</p>
+              <button
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    const response = await fetch('/api/generate-code', { method: 'POST' })
+                    const data = await response.json()
+                    if (data.code) {
+                      setGeneratedCode(data.code)
+                    }
+                  } catch (err) {
+                    setError('Kod oluşturulamadı')
+                  }
+                  setLoading(false)
+                }}
+                disabled={loading}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {loading ? 'Oluşturuluyor...' : 'Manuel Kod Oluştur'}
+              </button>
+              <p className="text-sm text-muted-foreground mt-4">veya Telegram'dan <code>/pass</code> komutunu gönderin</p>
             </div>
 
             {generatedCode && (
@@ -137,77 +155,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="bg-card border-4 border-primary rounded-lg p-8 shadow-lg">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-foreground">Son Oluşturulan Kodlar</h2>
-            <button onClick={loadRecentCodes} className="text-sm text-primary hover:text-primary/80 transition-colors">
-              Yenile
-            </button>
-          </div>
 
-          {recentCodes.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Henüz kod oluşturulmamış</p>
-          ) : (
-            <div className="space-y-3">
-              {recentCodes.map((codeData, index) => (
-                <div
-                  key={index}
-                  className={`border-2 rounded-lg p-4 ${
-                    codeData.used
-                      ? "border-muted bg-muted/20"
-                      : new Date() > codeData.expiresAt
-                        ? "border-destructive/50 bg-destructive/5"
-                        : "border-border bg-background"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <code className="text-sm font-mono text-foreground">{codeData.code}</code>
-                      <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>Oluşturulma: {codeData.createdAt.toLocaleString("tr-TR")}</span>
-                        <span>Son Kullanma: {codeData.expiresAt.toLocaleString("tr-TR")}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {codeData.used ? (
-                        <span className="px-3 py-1 bg-muted text-muted-foreground text-xs font-semibold rounded-full">
-                          Kullanıldı
-                        </span>
-                      ) : new Date() > codeData.expiresAt ? (
-                        <span className="px-3 py-1 bg-destructive/20 text-destructive text-xs font-semibold rounded-full">
-                          Süresi Doldu
-                        </span>
-                      ) : (
-                        <span className="px-3 py-1 bg-primary/20 text-primary text-xs font-semibold rounded-full">
-                          Aktif
-                        </span>
-                      )}
-                      <button
-                        onClick={() => copyToClipboard(codeData.code)}
-                        className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                        title="Kopyala"
-                      >
-                        <svg
-                          className="w-4 h-4 text-muted-foreground"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
     </div>
   )

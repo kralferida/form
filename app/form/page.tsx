@@ -837,9 +837,16 @@ export default function VisaFormPage() {
                 </p>
                 {formData.photo && (
                   <div className="mt-3 p-3 bg-secondary/20 rounded-lg">
-                    <p className="text-sm text-foreground">
+                    <p className="text-sm text-foreground mb-3">
                       ✅ Seçilen dosya: {formData.photo.name}
                     </p>
+                    <div className="flex justify-center">
+                      <img 
+                        src={URL.createObjectURL(formData.photo)} 
+                        alt="Önizleme" 
+                        className="w-32 h-32 object-cover border-2 border-border rounded-lg"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
