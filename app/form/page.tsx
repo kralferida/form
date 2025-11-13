@@ -67,6 +67,7 @@ export default function VisaFormPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
@@ -137,6 +138,7 @@ export default function VisaFormPage() {
         return
       }
       setFormData((prev) => ({ ...prev, photo: file }))
+      setPhotoPreview(URL.createObjectURL(file))
       setError('')
     }
   }
@@ -835,16 +837,16 @@ export default function VisaFormPage() {
                   • Son 6 ay içinde çekilmiş olmalı<br/>
                   • Maksimum dosya boyutu: 5MB
                 </p>
-                {formData.photo && (
+                {formData.photo && photoPreview && (
                   <div className="mt-3 p-3 bg-secondary/20 rounded-lg">
                     <p className="text-sm text-foreground mb-3">
                       ✅ Seçilen dosya: {formData.photo.name}
                     </p>
                     <div className="flex justify-center">
                       <img 
-                        src={URL.createObjectURL(formData.photo)} 
-                        alt="Önizleme" 
-                        className="w-32 h-32 object-cover border-2 border-border rounded-lg"
+                        src={photoPreview} 
+                        alt="Fotoğraf Önizlemesi" 
+                        className="w-32 h-32 object-cover border-2 border-border rounded-lg shadow-md"
                       />
                     </div>
                   </div>
